@@ -17,7 +17,7 @@ def generate_data(**kwargs):
     }
     df = pd.DataFrame(data)
 
-    file_path = "/tmp/data.csv"
+    file_path = "/tmp/data_dwh_4_t1_oguschin.csv"
 
     df.to_csv(file_path, index=False)
 
@@ -26,21 +26,26 @@ def generate_data(**kwargs):
 
 def load_data(**kwargs):
     import pandas as pd
+    from sqlalchemy import create_engine
 
-    df = pd.read_csv("/tmp/processed_data/data.csv")
+    df = pd.read_csv("/tmp/processed_data/data_dwh_4_t1_oguschin.csv")
 
     pg_hook = PostgresHook(postgres_conn_id="dwh_4_t1_oguschin_pg")
 
     create_table_sql = """
-    CREATE TABLE IF NOT EXISTS test_data (
+    CREATE TABLE IF NOT EXISTS test_data_dwh_4_t1_oguschin (
         id INTEGER PRIMARY KEY,
         value VARCHAR(50)
     );
     """
     pg_hook.run(create_table_sql)
 
-    conn = pg_hook.get_conn()
-    df.to_sql("test_data", conn, if_exists="replace", index=False)
+    conn_uri = pg_hook.get_uri()
+    engine = create_engine(conn_uri)
+
+    df.to_sql(
+        "test_data_dwh_4_t1_oguschin", engine, if_exists="replace", index=False
+    )
 
     kwargs["task_instance"].xcom_push(key="record_count", value=len(df))
 
@@ -66,7 +71,7 @@ def generate_and_load_data():
 
     move = BashOperator(
         task_id="move_file",
-        bash_command='mkdir -p /tmp/processed_data && mv {{ task_instance.xcom_pull(task_ids="generate_data", key="file_path") }} /tmp/processed_data/data.csv',
+        bash_command='mkdir -p /tmp/processed_data && mv {{ task_instance.xcom_pull(task_ids="generate_data", key="file_path") }} /tmp/processed_data/data_dwh_4_t1_oguschin.csv',
     )
 
     load = PythonOperator(
