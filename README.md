@@ -111,7 +111,38 @@ RLE, уровень сжатия 4 и колоночный тип хранени
 выполнения запросов и ваш вывод по эффективности выполненных преобразований над 
 таблицами.  
 ## Реализация
+- [sql script](sql scripts/practice_5.sql)
 
+Explain analyze payments
+![](attachments/Pasted%20image%2020250307212255.png)
+
+Explain analyze payments_compressed_row
+![](attachments/Pasted%20image%2020250307212415.png)
+
+Explain analyze payments_compressed_columnar
+![](attachments/Pasted%20image%2020250307212432.png)
+
+Сравнение размера:
+
+![](attachments/Pasted%20image%2020250307205906.png)
+
+![](attachments/Pasted%20image%2020250307205933.png)
+
+#### Выводы:
+payments:
+- Среднее время выполнения из-за отсутствия оптимизаций.
+- Высокий I/O и нагрузка на сеть (из-за DISTRIBUTED RANDOMLY).
+- Подходит для небольших данных, но неэффективна для аналитики.
+
+payments_compressed_row(ZSTD):
+- Быстрее оригинальной таблицы для точечных запросов.
+- Уменьшение размера на ~30-50%, но распаковка замедляет агрегации.
+- Оптимальна для OLTP-сценариев с частыми вставками/обновлениями.
+
+payments_compressed_columnar(RLE):
+- В 2-3 раза быстрее для аналитических запросов.
+- Максимальное уменьшение размера (до 70%) благодаря RLE.
+- Идеальна для OLAP-нагрузок и агрегаций.
 ## Задание R5.2
 Опишите индексы, которые встречаются в PostgreSQL и GreenPlum. Отдельно выделите индексы, 
 которые присутствуют только в GreenPlum.  
