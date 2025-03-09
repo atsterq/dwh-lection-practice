@@ -111,7 +111,7 @@ RLE, уровень сжатия 4 и колоночный тип хранени
 выполнения запросов и ваш вывод по эффективности выполненных преобразований над 
 таблицами.  
 ## Реализация
-- [sql script](sql scripts/practice_5.sql)
+- [sql script](<sql scripts/practice_5.sql>)
 
 Explain analyze payments
 ![](attachments/Pasted%20image%2020250307212255.png)
